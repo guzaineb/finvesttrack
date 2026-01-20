@@ -24,3 +24,9 @@ class User(AbstractUser):
     
     class Meta:
         db_table = 'users'
+        verbose_name = "Utilisateur"
+        verbose_name_plural = "Utilisateurs"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.email
