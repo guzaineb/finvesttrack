@@ -165,3 +165,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ROOT_URLCONF = 'config.urls'
 WSGI_APPLICATION = 'config.wsgi.application'
 AUTH_USER_MODEL = 'users.User'
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000']

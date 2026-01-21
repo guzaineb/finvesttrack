@@ -15,9 +15,29 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path , include
+from django.urls import path, include
+from rest_framework_simplejwt.views import TokenRefreshView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from django.views.generic import TemplateView
+from rest_framework.schemas import get_schema_view
 
 urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
+    
+    # API Authentication
     path('api/auth/', include('apps.users.urls')),
+    
+    # Portfolio API
+    path('api/portfolio/', include('apps.portfolio.urls')),
+    
+    # API Schema & Documentation
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    
+    # Login page for Django REST Framework browsable API
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    
+    # Home page
+    path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]
