@@ -4,7 +4,7 @@ from .views import (
     AssetViewSet,
     PortfolioSummaryView,
     PortfolioPerformanceView,
-    AssetDetailView
+
 )
 
 router = DefaultRouter()
@@ -14,5 +14,4 @@ urlpatterns = [
     path('', include(router.urls)),
     path('summary/', PortfolioSummaryView.as_view(), name='portfolio-summary'),
     path('performance/', PortfolioPerformanceView.as_view(), name='portfolio-performance'),
-    path('assets/<int:asset_id>/detail/', AssetDetailView.as_view(), name='asset-detail'),
-]
+  ]

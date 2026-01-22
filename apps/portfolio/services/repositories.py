@@ -32,10 +32,3 @@ class DjangoAssetRepository(IAssetRepository):
         except Exception:
             return False
     
-    @transaction.atomic
-    def update_current_price(self, asset_id: int, new_price: Decimal) -> Asset:
-        asset = self.find_by_id(asset_id)
-        if not asset:
-            raise ObjectDoesNotExist(f"Asset with id {asset_id} does not exist")
-        asset.update_current_price(new_price)
-        return asset

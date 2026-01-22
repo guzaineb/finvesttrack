@@ -1,10 +1,7 @@
 from rest_framework import viewsets, generics, status
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import SearchFilter, OrderingFilter
-from django_filters.rest_framework import DjangoFilterBackend
-from django.shortcuts import get_object_or_404
+from rest_framework.views import APIView
 
 from .models import Asset
 from .serializers import AssetSerializer
@@ -14,109 +11,59 @@ from .services.portfolio_service import PortfolioService
 
 
 class AssetViewSet(viewsets.ModelViewSet):
-    """Asset ViewSet with CRUD operations"""
+    """Gestion des actifs - Sans filtres complexes"""
     serializer_class = AssetSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['asset_type']
-    search_fields = ['symbol', 'name']
-    ordering_fields = ['created_at', 'current_value', 'performance_percentage']
-    ordering = ['-created_at']
-    
+    http_method_names = ['get', 'post', 'put', 'delete', 'head', 'options'] 
     def get_queryset(self):
-        """Return only user's assets"""
+        """Retourne uniquement les actifs de l'utilisateur connecté"""
         return Asset.objects.filter(user=self.request.user)
     
     def perform_create(self, serializer):
-        """Set user on asset creation"""
+        """Assigne l'utilisateur lors de la création"""
         serializer.save(user=self.request.user)
     
-    def perform_update(self, serializer):
-        """Prevent user change on update"""
-        serializer.save()
-    
-    @action(detail=True, methods=['put'])
-    def update_price(self, request, pk=None):
-        """Update asset current price"""
-        asset = self.get_object()
-        new_price = request.data.get('current_price')
+    def retrieve(self, request, *args, **kwargs):
+        """Détail d'un actif avec calcul de performance"""
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
         
-        if not new_price:
-            return Response(
-                {'error': 'current_price est requis.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        # Utiliser SimpleROICalculator pour le détail
+        calculator = SimpleROICalculator()
+        repository = DjangoAssetRepository()
+        service = PortfolioService(repository, calculator)
         
         try:
-            asset.update_current_price(new_price)
-            return Response(self.get_serializer(asset).data)
-        except ValueError as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            asset_detail = service.get_asset_detail(instance.id, request.user.id)
+            return Response(asset_detail)
+        except Exception as e:
+            # En cas d'erreur, retourner les données de base
+            return Response(serializer.data)
 
 
-class PortfolioSummaryView(generics.GenericAPIView):
-    """Portfolio summary view"""
+class PortfolioSummaryView(APIView):
+    """Vue pour le résumé du portefeuille"""
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        """Get portfolio summary"""
-        service = PortfolioService(
-            asset_repository=DjangoAssetRepository(),
-            calculator=SimpleROICalculator()
-        )
+        """Retourne le résumé du portefeuille"""
+        repository = DjangoAssetRepository()
+        calculator = SimpleROICalculator()
+        service = PortfolioService(repository, calculator)
         
         summary = service.get_portfolio_summary(request.user.id)
         return Response(summary)
 
 
-class PortfolioPerformanceView(generics.GenericAPIView):
-    """Portfolio performance view"""
+class PortfolioPerformanceView(APIView):
+    """Vue pour la performance du portefeuille"""
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        """Get portfolio performance"""
-        calculator_type = request.query_params.get('calculator', 'simple')
-        
-        if calculator_type == 'annualized':
-            calculator = AnnualizedROICalculator()
-        else:
-            calculator = SimpleROICalculator()
-        
-        service = PortfolioService(
-            asset_repository=DjangoAssetRepository(),
-            calculator=calculator
-        )
+        """Retourne la performance détaillée"""
+        repository = DjangoAssetRepository()
+        calculator = SimpleROICalculator()
+        service = PortfolioService(repository, calculator)
         
         performance = service.get_portfolio_performance(request.user.id)
         return Response(performance)
-
-
-class AssetDetailView(generics.GenericAPIView):
-    """Asset detail view with performance"""
-    permission_classes = [IsAuthenticated]
-    
-    def get(self, request, asset_id):
-        """Get asset detail with performance"""
-        calculator_type = request.query_params.get('calculator', 'simple')
-        
-        if calculator_type == 'annualized':
-            calculator = AnnualizedROICalculator()
-        else:
-            calculator = SimpleROICalculator()
-        
-        service = PortfolioService(
-            asset_repository=DjangoAssetRepository(),
-            calculator=calculator
-        )
-        
-        try:
-            asset_detail = service.get_asset_detail(asset_id, request.user.id)
-            return Response(asset_detail)
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_404_NOT_FOUND
-            )

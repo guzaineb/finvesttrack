@@ -14,7 +14,6 @@ class SimpleROICalculator(IPerformanceCalculator):
         except (TypeError, ValueError):
             return 0.0
 
-
 class AnnualizedROICalculator(IPerformanceCalculator):
     """Annualized ROI Calculator Strategy"""
     
@@ -30,7 +29,6 @@ class AnnualizedROICalculator(IPerformanceCalculator):
             return float(annualized_return)
         except (TypeError, ValueError, ZeroDivisionError):
             return 0.0
-
 
 class PortfolioMetricsCalculator:
     """Portfolio metrics calculator following Single Responsibility Principle"""

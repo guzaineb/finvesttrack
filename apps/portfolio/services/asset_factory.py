@@ -34,8 +34,6 @@ class AssetFactory:
         
         return cls.create(asset_type, **kwargs)
 
-
-# Concrete creators
 def create_stock(**kwargs) -> Asset:
     """Create a STOCK asset"""
     return Asset(asset_type='STOCK', **kwargs)
@@ -50,8 +48,6 @@ def create_crypto(**kwargs) -> Asset:
     """Create a CRYPTO asset"""
     return Asset(asset_type='CRYPTO', **kwargs)
 
-
-# Register creators
 AssetFactory.register('STOCK', create_stock)
 AssetFactory.register('BOND', create_bond)
 AssetFactory.register('CRYPTO', create_crypto)

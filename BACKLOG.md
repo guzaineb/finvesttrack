@@ -7,7 +7,10 @@
 ## Sprint 1: Gestion des Utilisateurs (HAUTE)
 - [x] US-003: Création de compte 
 - [x] US-004: Authentification JWT
-
+##
+- JWT (access / refresh)
+- Password hashing
+- Email uniqueness validation
 ## Sprint 2: Gestion des Actifs (HAUTE)
 - [x] US-005: Ajouter un actif 
 - [x] US-006: Lister les actifs

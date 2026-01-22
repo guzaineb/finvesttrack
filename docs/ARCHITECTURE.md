@@ -18,14 +18,37 @@ L'architecture suit une approche modulaire avec séparation claire des responsab
   - `repositories.py`: Accès aux données
   - `calculators.py`: Algorithmes de calcul
   - `portfolio_service.py`: Orchestration métier
-  - `asset_factory.py`: Création d'objets
-
+  - `asset_factory.py`: Création d'objets en utilisant Factory Pattern 
+- **Design Patterns**: Strategy, Repository, Factory, Dependency Injection
+- **Emplacement**: `portfolio/services/`
 ### 3. Couche API (Views/Serializers)
 - **Responsabilité**: Gestion des requêtes HTTP
-- **Exemple**: `AssetViewSet`, `PortfolioSummaryView`
+  - `AssetViewSet`: CRUD complet des actifs avec calcul de performance
+  - `PortfolioSummaryView`: Résumé consolidé du portefeuille
+  - `PortfolioPerformanceView`: Détails de performance avec ROI
 - **Principe**: Thin Controllers (logique métier déléguée aux services)
+ **Emplacement**: `portfolio/views.py`, `portfolio/serializers.py`
 
 ### 4. Couche Infrastructure (Configuration)
 - **Responsabilité**: Configuration, URLs, middleware
-- **Exemple**: `settings.py`, `urls.py`
+- **Exemple**: `settings.py`, `urls.py`, authentification Django
+- **Emplacement**: `config/`
 
+### 5. Couche Tests
+- **Structure**:
+tests/
+ ├── test_models.py
+ ├── test_repository.py
+ ├── test_services.py
+ ├── test_factory.py
+ ├── test_calculators.py
+ ├── test_views.py
+```
+
+
+  - `test_calculators.py`: Tests unitaires des algorithmes de calcul
+  - `test_repositories.py`: Tests des repositories
+  - `test_services.py`: Tests des services métier
+  - `test_views.py`: Tests d'intégration des endpoints API
+- **Outils**: pytest, pytest-django, coverage
+- **Emplacement**: `tests/`, `portfolio/tests/`

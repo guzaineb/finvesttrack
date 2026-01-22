@@ -97,6 +97,3 @@ class IAssetRepository(ABC):
     def delete(self, asset_id: int) -> bool:
         pass
     
-    @abstractmethod
-    def update_current_price(self, asset_id: int, new_price: Decimal) -> IAsset:
-        pass
