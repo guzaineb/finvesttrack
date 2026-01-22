@@ -3,6 +3,15 @@
 ## Description
 Application de suivi de portefeuille d'investissement avec Django REST Framework.
 
+## Stack Technique
+- **Backend**: Python 3.10+, Django 4.2+
+- **API**: Django REST Framework
+- **Base de données**: SQLite 
+- **Authentification**: JWT(djangorestframework-simplejwt)
+- **Tests**: pytest + pytest-django
+- **Documentation**: drf-spectacular (Swagger)
+
+
 ## Installation
 1. Cloner le projet
 2. Créer un environnement virtuel: `python -m venv venv`

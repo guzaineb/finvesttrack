@@ -9,17 +9,19 @@ User = get_user_model()
 
 @pytest.mark.django_db
 class TestAssetModel:
-    """Tests unitaires pour le modèle Asset"""
+    """Tests pour le modèle Asset"""
+    
+    def setup_method(self):
+        """Setup avant chaque test"""
+        self.user = User.objects.create_user(
+            email='assetowner@example.com',
+            password='password123'
+        )
     
     def test_create_asset(self):
         """Test création d'un actif"""
-        user = User.objects.create_user(
-            email='test@example.com',
-            password='password123'
-        )
-        
         asset = Asset.objects.create(
-            user=user,
+            user=self.user,
             asset_type='STOCK',
             symbol='AAPL',
             name='Apple Inc.',
@@ -31,14 +33,13 @@ class TestAssetModel:
         
         assert asset.symbol == 'AAPL'
         assert asset.asset_type == 'STOCK'
-        assert asset.user == user
+        assert asset.user == self.user
+        assert asset.current_value == Decimal('1752.50')  # 10 * 175.25
     
     def test_current_value_calculation(self):
-        """Test du calcul de la valeur actuelle"""
-        user = User.objects.create_user(email='test2@example.com', password='pass')
-        
+        """Test calcul de la valeur actuelle"""
         asset = Asset.objects.create(
-            user=user,
+            user=self.user,
             asset_type='CRYPTO',
             symbol='BTC',
             name='Bitcoin',
@@ -49,40 +50,53 @@ class TestAssetModel:
         )
         
         # 0.5 * 55000 = 27500
-        expected_value = Decimal('27500.00')
-        assert asset.current_value == expected_value
+        assert asset.current_value == Decimal('27500.00')
     
-    def test_performance_percentage(self):
-        """Test du calcul de performance"""
-        user = User.objects.create_user(email='test3@example.com', password='pass')
-        
+    def test_gain_loss_positive(self):
+        """Test gain positif"""
         asset = Asset.objects.create(
-            user=user,
-            asset_type='BOND',
-            symbol='BOND1',
-            name='Government Bond',
-            quantity=Decimal('100.0'),
-            purchase_price=Decimal('100.00'),  # Achat à 100
-            current_price=Decimal('110.00'),   # Actuel à 110
-            purchase_date=date(2024, 1, 1)
-        )
-        
-        # Gain de 10% : ((110-100)/100)*100 = 10%
-        assert asset.performance_percentage == 10.0
-    
-    def test_zero_performance(self):
-        """Test performance à 0%"""
-        user = User.objects.create_user(email='test4@example.com', password='pass')
-        
-        asset = Asset.objects.create(
-            user=user,
+            user=self.user,
             asset_type='STOCK',
-            symbol='TEST',
-            name='Test',
-            quantity=Decimal('10.0'),
-            purchase_price=Decimal('100.00'),
-            current_price=Decimal('100.00'),  # Même prix
+            symbol='GAIN',
+            name='Gain Stock',
+            quantity=Decimal('100.0'),
+            purchase_price=Decimal('1.00'),   # Achat à 1
+            current_price=Decimal('1.50'),    # Actuel à 1.5
             purchase_date=date(2024, 1, 1)
         )
         
-        assert asset.performance_percentage == 0.0
+        # Gain de 50: (100 * 1.5) - (100 * 1) = 150 - 100 = 50
+        assert asset.gain_loss == Decimal('50.00')
+    
+    def test_gain_loss_negative(self):
+        """Test perte"""
+        asset = Asset.objects.create(
+            user=self.user,
+            asset_type='BOND',
+            symbol='LOSS',
+            name='Loss Bond',
+            quantity=Decimal('1000.0'),
+            purchase_price=Decimal('100.00'),  # Achat à 100
+            current_price=Decimal('95.00'),    # Actuel à 95
+            purchase_date=date(2024, 1, 1)
+        )
+        
+        # Perte de 5000: (1000 * 95) - (1000 * 100) = 95000 - 100000 = -5000
+        assert asset.gain_loss == Decimal('-5000.00')
+    
+    def test_performance_percentage_positive(self):
+        """Test performance positive"""
+        asset = Asset.objects.create(
+            user=self.user,
+            asset_type='STOCK',
+            symbol='POS',
+            name='Positive',
+            quantity=Decimal('10.0'),
+            purchase_price=Decimal('100.00'),  # Achat à 100
+            current_price=Decimal('120.00'),   # Actuel à 120 (+20%)
+            purchase_date=date(2024, 1, 1)
+        )
+        
+        # Performance: ((120-100)/100)*100 = 20%
+        assert asset.performance_percentage == 20.0
+    
