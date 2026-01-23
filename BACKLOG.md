@@ -17,19 +17,18 @@
 - [x] US-007: Détail d'un actif 
 
 ## Sprint 3: Calculs & Analytics (MOYENNE)
-- [ ] US-008: Valeur totale 
-- [ ] US-009: Performance globale 
+- [x]US-008: Valeur totale 
+- [x] US-009: Performance globale 
 
 ## Rétrospective
 ### Ce qui a bien fonctionné:
 - Application réussie des patterns Factory et Strategy
 - Séparation claire des responsabilités
 - Tests unitaires couvrant les services métier
-
+- Implémentation caching pour les calculs 
 ### Difficultés rencontrées:
 - Configuration initiale de JWT avec DRF
 - Gestion des dépendances circulaires
 
 ### Améliorations possibles:
 - Ajouter plus de tests d'intégration
-- Implémenter le caching pour les calculs
